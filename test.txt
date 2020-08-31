@@ -1,0 +1,99 @@
+$('#user_table').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: {
+        url: "{{route('ajax-crud.index')}}",
+        columns: [{
+                data: 'image',
+                name: 'image',
+                render: function (data, type, full, meta) {
+                    return "<img src={{ URL::to('/') }}/images/" + data +" width='70' class='img-thumbnail' />";
+                },
+                orderable: false,
+            },
+            {
+                data: 'frist_name',
+                name: 'frist_name',
+            },
+            {
+                data: 'last_name',
+                name: 'last_name',
+            },
+            {
+                data: 'action',
+                name: 'action',
+                orderable: false,
+            }
+        ],
+    }
+});
+
+
+$('sample_form').on('submit', function(event){
+    event.preventDefault();
+    if($('#action').val == 'Add'){
+        $.ajax({
+            url: "{{route('ajax-crud.store')}}",
+            type: "POST",
+            data: new FormData(this),
+            contentType: false,
+            cache: false,
+            processData: false,
+            dataType: "json"
+            success:function(data){
+                var html = '';
+                if(data.errors){
+                    html = '<div class= "alert alert-danger"';
+                    for(var c= 0; c < data.errors.length ; c++){
+                        html += '<p>' + data.errors[c] + '</p>'
+                    }
+                    html += '</div>';
+                }
+
+                if(data.success){
+                    html = '<div class= "alert alert-success"' + data.success + '</div>';
+                    $('#sample_form')[0].reset();
+                    $('#user_table').DataTable.ajax.reload();
+                }
+                $('#form_result').html(html);
+            }
+
+        });
+    }
+
+});
+
+
+
+
+
+
+if ($('#action').val() == "Edit") {
+    $.ajax({
+        url: "{{route('ajax-crud.update')}}",
+        type: "POST",
+        data: new FormData(this),
+        contentType: false,
+        cache: false,
+        processData: false,
+        dataType: "json",
+        success: function (data) {
+            var html = '';
+            if (data.errors) {
+                html = '<div class="alert alert-danger">';
+                for (var count = 0; count < data.errors.length; count++) {
+                    html += "<p>" + data.errors[count] + "</p>";
+                }
+                html += '</div>';
+            }
+            if (data.success) {
+                html = '<div class="alert alert-success">' + data.success +
+                    '</div>';
+                $('#sample_form')[0].reset();
+                $('#store_image').html('');
+                $('#user_table').DataTable().ajax.reload();
+            }
+            $('#form_result').html(html);
+        }
+    })
+}
